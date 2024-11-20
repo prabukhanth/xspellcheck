@@ -1,50 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// Initial dictionary state
-const initialDictionary = [
-    { word: "React", meaning: "A JavaScript library for building user interfaces." },
-    { word: "Component", meaning: "A reusable building block in React." },
-    { word: "State", meaning: "An object that stores data for a component." }
-];
+const customDictionary = {
+  teh: "the",
+  wrok: "work",
+  fot: "for",
+  exampl: "example"
+};
 
-function XDictionary() {
-    const [dictionary] = useState(initialDictionary); // Dictionary state
-    const [searchTerm, setSearchTerm] = useState(''); // Input state
-    const [result, setResult] = useState(''); // Result state
+function XSpellCheck() {
+  const [inputText, setInputText] = useState('');
+  const [suggestion, setSuggestion] = useState('');
 
-    // Handler for search
-    const handleSearch = () => {
-        // Search in the dictionary (case-insensitive)
-        const foundWord = dictionary.find(item => item.word.toLowerCase() === searchTerm.toLowerCase());
+  const handleInputChange = (event) => {
+    setInputText(event.target.value);
+  };
 
-        // Update result based on the search
-        if (foundWord) {
-            setResult(foundWord.meaning);
-        } else {
-            setResult("Word not found in the dictionary.");
-        }
-    };
+  useEffect(() => {
+    // Reset suggestion on input change
+    if (!inputText) {
+      setSuggestion('');
+      return;
+    }
 
-    return (
-        <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
-            <h1>Dictionary App</h1>
-            <input 
-                type="text" 
-                placeholder="Search for a word..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ padding: '10px', width: 'calc(100% - 20px)', marginBottom: '10px' }}
-            />
-            <button 
-                onClick={handleSearch} 
-                style={{ padding: '10px', cursor: 'pointer' }}
-            >
-                Search
-            </button>
-            <p style={{ marginTop: '20px', fontWeight: 'bold' }}>Definition:</p>
-            <p>{result}</p>
-        </div>
-    );
+    // Split the input text into words
+    const words = inputText.toLowerCase().split(' ');
+
+    // Find the first misspelled word in the dictionary
+    const misspelledWord = words.find(word => customDictionary[word]);
+
+    // If there's a misspelled word, suggest the correction
+    if (misspelledWord) {
+      const correctedWord = customDictionary[misspelledWord];
+      setSuggestion(
+        <span>
+          Did you mean: <strong>{correctedWord}</strong>?
+        </span>
+      );
+    } else {
+      setSuggestion('');
+    }
+  }, [inputText]);
+
+  return (
+    <div>
+      <h1>Spell Check and Auto-Correction</h1>
+      <textarea 
+        value={inputText} 
+        onChange={handleInputChange} 
+        placeholder="Enter text..." 
+        rows="4" 
+        cols="50"
+      />
+      {suggestion && <p>{suggestion}</p>}
+    </div>
+  );
 }
 
-export default XDictionary;
+export default XSpellCheck;
